@@ -49,7 +49,7 @@ Para essa congiguração, como `n/vl = 64/16 =4`, o loop deve ser executado 4 ve
 |  VLOAD v2, (x5)  | 16 |   LSU   | 38 | 38 | 41 |
 |  VLOAD v3, (x6)  | 16 |   LSU   | 42 | 42 | 45 |
 |  VFMA v3, v2, v1 | 16 |   VALU  | 43 | 46 | 49 |
-|  VSTORE v3, (x6) | 16 |   LSU   | 46 | 50 | 33 |
+|  VSTORE v3, (x6) | 16 |   LSU   | 46 | 50 | 53 |
 |  ADD x5, x5, x3  |  - |   ALU   | 47 | 47 | 47 |
 |  ADD x6, x6, x3  |  - |   ALU   | 48 | 48 | 48 |
 | BNE x4, x1, LOOP |  - |   ALU   | 49 | 49 | 49 |
