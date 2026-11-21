@@ -1,0 +1,16 @@
+// x1 = n e f1 = a inicialmente carregados
+    VSETVL x2, x1       // x1 = n, x2 = vl
+    VZERO v1            // v1 é um vetor de zeros
+    SLLI x3, x2, 2      // x3 = x2 * 2²
+    ADD x4, x0, x0      // x4 = 0
+LOOP:
+    ADD x4, x4, x2      // Incrementa contador de elementos carregados x4
+    VLOAD v2, (x5)      // Carrega bytes de endereço no intervalo [x5, x5+x3-1] do vetor X
+    VLOAD v3, (x6)      // Carrega bytes de endereço no intervalo [x6, x6+x3-1] do vetor Y
+    VFMA v1, v2, v3     // Z[i] += X[i]*Z[i]
+    ADD x5, x5, x3      // Atualiza endereço x5 com deslocamento de x3 bytes
+    ADD x6, x6, x3      // Atualiza endereço x6 com deslocamento de x3 bytes
+    BNE x4, x1, LOOP    // se x4 = n, saímos do loop
+FIM:
+    VREDSUM f1, v1, f0  // f1 = Σ Z[i]
+    FSW f1 0(x7)        // fim do kernel
