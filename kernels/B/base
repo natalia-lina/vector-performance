@@ -13,4 +13,4 @@ LOOP:
     BNE x4, x1, LOOP    // se x4 = n, saímos do loop
 FIM:
     VREDSUM f1, v1, f0  // f1 = Σ Z[i]
-    FSW f1 0(x7)        // fim do kernel
+    FSW f1 0(x7)        // armazena f1 na memória, fim do kernel
