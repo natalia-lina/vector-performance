@@ -5,6 +5,7 @@
     ADD x5, x0, x0              // x5 = 0
     ADD x11, x8, x0             // x11 é cópia do endereço base de A
     ADD x12, x9, x0             // x12 é cópia do endereço base de B
+    MUL x13, x3, x2             // x13 = 4n*vl
 LOOP1:
     ADD x6, x0, x0              // x6 = 0
 LOOP2:
@@ -20,7 +21,7 @@ LOOP3:
     VLOAD_STRIDED v3, (x9), x3  // Carrega vl elementos da coluna de B
     VFMA v1, v2, v3             // Z[i] += X[i]*Y[i]
     ADD x8, x8, x4              // Atualiza endereço x8 com deslocamento de 4vl bytes
-    ADDI x9, x9, x3             // Atualiza endereço x9 com deslocamento de 4n bytes
+    ADD x9, x9, x13             // Atualiza endereço x9 com deslocamento de 4n*vl bytes
     BNE x7, x1, LOOP3           // Se x7 = n, saímos do LOOP3
     VREDSUM f1, v1, f0          // Produto interno de linha de A com coluna de B
     FSW f1, 0(x10)              // Armazena entrada da matriz resultante
