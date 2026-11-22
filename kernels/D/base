@@ -1,0 +1,33 @@
+// x1 = n; x8, x9 e x10 são endereços base das matrizes A, B e C respectivamente
+    VSETVL x2, x1       // x2 = vl
+    SLLI x3, x2, 2      // x3 = 4vl
+    SLLI x11, x1, 2     // x11 = 4n
+    ADD x4, x0, x0      // x4=0, índice das linhas de A e C 
+LOOP1:  
+    ADD x5, x0, x0      // x5=0, índice do bloco de tamanho vl
+    MUL x13, x4, x11    // x13=x4*4n 
+    ADD x13, x8, x13    // x13=x8 + x13, incrementa endereço da matriz A para linha referente ao índice x4
+    MUL x14, x4, x11    // x14=x4*4n
+    ADD x14, x10, x14   // x14=x10 + x14, incrementa endereço da matriz C para linha referente ao índice x4
+LOOP2:
+    VZERO v3            // vetor acumulador zerado
+    ADD x6, x0, x0      // x6=0, índice da linha da matriz B e da coluna da matriz A
+    SLLI x15, x5, 2     // x15=4*x5
+    ADD x15, x9, x15    // x15 é o endereço do bloco (de tamanho vl) dentro da atual linha 0 de B
+    ADD x16, x13, x0    // x16=x13, cópia do endereço da matriz A para linha referente ao índice x4
+LOOP3:
+    FLW f1, 0(x16)      // carrega elemento A[x4][x6]
+    VSPLAT v1, f1       // cria vetor linha de elementos A[x4][x6]
+    VLOAD v2, (x15)     // carrega o vetor "bloco" da atual linha de B
+    VFMA v3, v1, v2     // c = c + A[x4][x6]*B[x6], calculando a linha de índice x4 da matrix C
+    ADDI x16, x16, 4    // endereço da coluna seguinte da matriz A, na linha x4
+    ADD x15, x15, x11   // endereço da próxima linha da matriz B
+    ADDI x6, x6, 1     // x6 = x6 + 1, atualiza índice da linha de B/coluna de A
+    BNE x6, x1, LOOP3   // se x6 = n, saímos do loop3
+    VSTORE v3, (x14)    // armazena o bloco de C
+    ADD x14, x14, x3    // incrementa o endereço da matrix C em 4vl
+    ADD x5, x5, x2      // x5=x5+vl, próximo bloco na atual linha de B
+    BNE x5, x1, LOOP2   // se x5=n, saímos do loop2
+    ADDI x4, x4, 1      // incrementa o índice das linhas de A e C
+    BNE x4, x1, LOOP1   // se x4=n, saímos do loop4
+FIM:                    // fim do kernell
