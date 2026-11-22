@@ -161,6 +161,7 @@ A operações de ponto de ponto flutuante ocorrem somente na instrução `VFMA`.
 
 > ```
 > N_FLOPS = 32*n/16 = 2n
+> => N_FLOPS(n=2^20) = 2*2^20 = 2^21
 > ```
 
 #### 2. Tráfego
@@ -169,6 +170,7 @@ O tráfego, que se refere à transferência de bytes, somente dentro dos loops, 
 
 >``` 
 > Q = (2*16*4 + 16*4)*n/16 = 12n
+> => Q(n=2^20) = 3*2^2*2^20 = 3*2^22
 >```
 
 #### 3. Intensidade Computacional
@@ -184,7 +186,7 @@ Tendo a quantidade de operações de ponto flutuante `N_FLOPS=2n` e o tráfego `
 O desempenho computacional estimado a partir da quantidade de operações `N_FLOPS=2n` e do total de ciclos de execução `ciclos = 5 + n`, temos:
 
 > ```
-> P_estimado = 2n/(5+n) => P_estimado = 128/69 FLOP/ciclo
+> P_estimado = 2^21/(5+2^20) => P_estimado ~ 2 FLOP/ciclo
 > ```
 
 #### 5. Roofline
@@ -192,6 +194,6 @@ O desempenho computacional estimado a partir da quantidade de operações `N_FLO
 ![alt text](roofline.png "Title")
 
 > ```
-> η_roof = P_estimado/P(I) => η_roof = (128/69)/(16/6) = (128/16) * (6/69) = 8*2/23 = 16/23 ~ 0.7
+> η_roof = P_estimado/P(I) => η_roof = (2^21/(5+2^20))/(16/6) = (2^21/(5+2^20)) * (3/2^3) = 3*2^18/(5+2^20) ~ 0.75
 > ```
 
