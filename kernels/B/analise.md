@@ -17,7 +17,7 @@
 |    VFMA   | 4 |    32   |
 |   VSPLAT  | 4 |    0    |
 |   VZERO   | 4 |    0    |
-|  VREDSUM  | 6 |    0    |
+|  VREDSUM  | 6 |    16   |
 |    FSW    | 1 |    0    |
 |    ADD    | 1 |    0    |
 |    SLLI   | 1 |    0    |
@@ -155,4 +155,53 @@ Podemos dividir o algorítmo em dois blocos:
 > `ciclos(n=48) = 41+7 = 48`
 > `ciclos(n=48) = 12*(1+3) = 48`
 
+> ciclos(n=1024) = 12*(1+1024/16) = 12*65 = 780
+> ciclos(n=2^20) = 12*(1+2^20/16) = 12*65537 = 786444
 
+### Desempenho e Roofline
+
+#### 1. Número de FLOPs
+
+Para esse kernel, a instrução `VREDSUM`, executada somente uma vez após a execução de todos os loops, executa 16 FLOPs. Já a instrução `VFMA`executa 32 FLOPs em cada loop. Portanto, a quantidade total de FLOPs é dada por:
+
+>```
+> N_FLOPS = 16 + 32*(n/16) = 16 + 2n
+> => N_FLOPS(n=2^20) = 16 + 2^21 FLOPs
+>```
+
+#### 2. Tráfego
+
+Temos instrução `FSW` executada pós-loop, que transfere um 16 bytes; e duas instruções `VLOAD` que transferem 16*4 = 64 bytes cada, executadas dentro do loop. Portanto, o tráfego é dado por:
+
+>``` 
+> Q = 16 + 2*64*(n/16) = 16 + 8n
+> => Q(n=2^20) = (16 + 2^23) bytes
+>```
+
+
+#### 3. Intensidade Computacional
+
+Tendo a quantidade de operações de ponto flutuante `N_FLOPS=16 + 2n` e o tráfego `Q=16 + 8n` em bytes, a intensidade computacional segue:
+
+>```
+> I = (16 + 2n)/(16 + 8n) = (8+n)/(8+4n) FLOP/byte 
+> => I(n=2^20) = (8+2^20)/(8+2^22) ~ 0.25
+>```
+
+#### 4. Desempenho
+
+O desempenho computacional estimado a partir da quantidade de operações `N_FLOPS = 16 + 2n` e do total de ciclos de execução `ciclos(n) = 12*(1+n/16)`, temos:
+
+> ```
+> P_estimado = (16 + 2n)/(12*(1+n/16))
+> => P_estimado(n=2^20) = (16 + 2^21)/(12*(1+2^16)) FLOP/ciclo
+> => P_estimado(n=2^20) ~ 2.67 FLOP/ciclo
+> ```
+
+#### 5. Roofline
+
+![alt text](roofline.png "Title")
+
+> ```
+> η_roof = P_estimado/P(I) => η_roof = [(16 + 2^21) / (12*(1 + 2^16))] / [16 * (8 + 2^20)/(8 + 2^22)]  ~ 0.67
+> ```
